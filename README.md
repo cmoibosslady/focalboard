@@ -57,6 +57,7 @@ cp .env.example .env
 # 2. Create local TLS certs (works offline, no public internet required)
 #    → in the command below, replace YOUR_PI_IP with your Pi LAN IP
 #    → requires OpenSSL version 1.1.1 or newer for -addext support
+#    → run `openssl version`; if -addext is unsupported (common with LibreSSL), install OpenSSL 1.1.1+
 mkdir -p nginx/certs
 openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
   -keyout nginx/certs/privkey.pem \
