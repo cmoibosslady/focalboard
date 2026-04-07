@@ -1,0 +1,68 @@
+# Production deployment: Focalboard + PostgreSQL + Nginx reverse proxy.
+#
+# This setup is recommended when exposing the server to the internet.
+# Nginx terminates TLS (if you add certificates) and acts as a reverse proxy.
+#
+# Usage:
+#   cp .env.example .env   # then fill in the values
+#   docker compose -f docker-compose.nginx.yml up -d
+
+version: "3.9"
+
+services:
+  focalboard:
+    image: mattermost/focalboard:latest
+    platform: linux/arm64
+    container_name: focalboard
+    restart: unless-stopped
+    depends_on:
+      - db
+    expose:
+      - "8000"
+    volumes:
+      - fbdata:/opt/focalboard/data
+      - ./config/focalboard.json:/opt/focalboard/config.json:ro
+    networks:
+      - internal
+      - proxy
+    environment:
+      - FOCALBOARD_SERVER_ROOT=${FOCALBOARD_SERVER_ROOT:-http://localhost}
+
+  db:
+    image: postgres:15-alpine
+    platform: linux/arm64
+    container_name: focalboard-db
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-boards}
+      POSTGRES_USER: ${POSTGRES_USER:-boardsuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-CHANGE_ME}
+    networks:
+      - internal
+
+  proxy:
+    image: nginx:stable-alpine
+    platform: linux/arm64
+    container_name: focalboard-proxy
+    restart: unless-stopped
+    depends_on:
+      - focalboard
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/focalboard.conf:ro
+      # Uncomment to mount TLS certificates for HTTPS:
+      # - ./nginx/certs:/etc/nginx/certs:ro
+    networks:
+      - proxy
+
+volumes:
+  fbdata:
+  pgdata:
+
+networks:
+  internal:
+  proxy:
