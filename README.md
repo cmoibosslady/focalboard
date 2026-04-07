@@ -55,12 +55,12 @@ cp .env.example .env
 #    → set a strong POSTGRES_PASSWORD
 
 # 2. Create local TLS certs (works offline, no public internet required)
+#    → in the commands below, replace YOUR_PI_IP with your Pi LAN IP
 mkdir -p nginx/certs
 openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
   -keyout nginx/certs/privkey.pem \
   -out nginx/certs/fullchain.pem \
-  -subj "/CN=192.168.1.42"
-#    → replace 192.168.1.42 with your Pi LAN IP or local hostname
+  -subj "/CN=YOUR_PI_IP"
 
 # 3. Update config/focalboard.json to use PostgreSQL
 #    Change "dbtype" to "postgres" and set "dbconfig" to match your credentials.
@@ -69,7 +69,7 @@ openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
 docker compose -f docker-compose.nginx.yml up -d
 ```
 
-Focalboard will be reachable on **https://192.168.1.42** via Nginx (port 443).  
+Focalboard will be reachable on **https://YOUR_PI_IP** via Nginx (port 443).  
 Port 80 redirects to HTTPS automatically.
 
 ---
