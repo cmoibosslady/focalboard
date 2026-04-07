@@ -55,12 +55,13 @@ cp .env.example .env
 #    → set a strong POSTGRES_PASSWORD
 
 # 2. Create local TLS certs (works offline, no public internet required)
-#    → in the commands below, replace YOUR_PI_IP with your Pi LAN IP
+#    → in the command below, replace YOUR_PI_IP with your Pi LAN IP
 mkdir -p nginx/certs
 openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
   -keyout nginx/certs/privkey.pem \
   -out nginx/certs/fullchain.pem \
-  -subj "/CN=YOUR_PI_IP"
+  -subj "/CN=YOUR_PI_IP" \
+  -addext "subjectAltName=IP:YOUR_PI_IP"
 
 # 3. Update config/focalboard.json to use PostgreSQL
 #    Change "dbtype" to "postgres" and set "dbconfig" to match your credentials.
