@@ -56,6 +56,7 @@ cp .env.example .env
 
 # 2. Create local TLS certs (works offline, no public internet required)
 #    → in the command below, replace YOUR_PI_IP with your Pi LAN IP
+#    → requires OpenSSL 1.1.1+ for -addext support
 mkdir -p nginx/certs
 openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
   -keyout nginx/certs/privkey.pem \
@@ -70,7 +71,7 @@ openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
 docker compose -f docker-compose.nginx.yml up -d
 ```
 
-Focalboard will be reachable on **https://YOUR_PI_IP** via Nginx (port 443).  
+Focalboard will be reachable on **https://YOUR_PI_IP** (same value as above) via Nginx (port 443).  
 Port 80 redirects to HTTPS automatically.
 
 ---
