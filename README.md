@@ -1,6 +1,6 @@
 # Focalboard on Raspberry Pi 5 — Docker Setup
 
-A self-hosted [Focalboard](https://www.focalboard.com/) server running inside Docker on a **Raspberry Pi 5** (ARM64).  
+A self-hosted [Focalboard](https://www.focalboard.com/) server running inside Docker on a **Raspberry Pi 5** (ARM64 / aarch64).  
 Friends can connect from outside your home network once you forward the right port on your router.
 
 ---
@@ -51,17 +51,29 @@ Use this when you want a more robust database and a proper HTTP server in front 
 ```bash
 # 1. Copy and edit the environment file
 cp .env.example .env
-#    → set FOCALBOARD_SERVER_ROOT to your public domain or IP
+#    → set FOCALBOARD_SERVER_ROOT to your HTTPS URL
 #    → set a strong POSTGRES_PASSWORD
 
-# 2. Update config/focalboard.json to use PostgreSQL
+# 2. Create local TLS certs (works offline, no public internet required)
+#    → in the command below, replace YOUR_PI_IP with your Pi LAN IP
+#    → requires OpenSSL version 1.1.1 or newer for -addext support
+#    → run `openssl version`; if -addext is unsupported (common with LibreSSL), install OpenSSL 1.1.1+
+mkdir -p nginx/certs
+openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
+  -keyout nginx/certs/privkey.pem \
+  -out nginx/certs/fullchain.pem \
+  -subj "/CN=YOUR_PI_IP" \
+  -addext "subjectAltName=IP:YOUR_PI_IP"
+
+# 3. Update config/focalboard.json to use PostgreSQL
 #    Change "dbtype" to "postgres" and set "dbconfig" to match your credentials.
 
-# 3. Start the stack
+# 4. Start the stack
 docker compose -f docker-compose.nginx.yml up -d
 ```
 
-Focalboard will be reachable on **port 80** (HTTP) through the Nginx proxy.
+Focalboard will be reachable on **https://YOUR_PI_IP** (same value as above) via Nginx (port 443).  
+Port 80 redirects to HTTPS automatically.
 
 ---
 
@@ -88,8 +100,7 @@ To let friends connect from the internet you need to:
 
 4. *(Recommended)* **Use a Dynamic DNS (DDNS) service** such as [DuckDNS](https://www.duckdns.org/) or [No-IP](https://www.noip.com/) so the URL stays the same even if your ISP changes your IP.
 
-5. *(Recommended)* **Enable HTTPS** using a free [Let's Encrypt](https://letsencrypt.org/) certificate.  
-   Uncomment the HTTPS block in `nginx/nginx.conf` and mount your certificates.
+5. *(Recommended for internet exposure)* Replace self-signed certs with a trusted certificate (for example [Let's Encrypt](https://letsencrypt.org/)).
 
 ---
 
