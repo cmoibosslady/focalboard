@@ -59,7 +59,8 @@ mkdir -p nginx/certs
 openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
   -keyout nginx/certs/privkey.pem \
   -out nginx/certs/fullchain.pem \
-  -subj "/CN=<raspberry-pi-ip-or-local-hostname>"
+  -subj "/CN=192.168.1.42"
+#    → replace 192.168.1.42 with your Pi LAN IP or local hostname
 
 # 3. Update config/focalboard.json to use PostgreSQL
 #    Change "dbtype" to "postgres" and set "dbconfig" to match your credentials.
@@ -68,7 +69,7 @@ openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
 docker compose -f docker-compose.nginx.yml up -d
 ```
 
-Focalboard will be reachable on **https://<raspberry-pi-ip>** via Nginx (port 443).  
+Focalboard will be reachable on **https://192.168.1.42** via Nginx (port 443).  
 Port 80 redirects to HTTPS automatically.
 
 ---
