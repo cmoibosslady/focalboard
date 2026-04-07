@@ -12,6 +12,7 @@ version: "3.9"
 services:
   focalboard:
     image: mattermost/focalboard:latest
+    # Raspberry Pi aarch64 maps to Docker platform linux/arm64.
     platform: linux/arm64
     container_name: focalboard
     restart: unless-stopped
@@ -26,10 +27,11 @@ services:
       - internal
       - proxy
     environment:
-      - FOCALBOARD_SERVER_ROOT=${FOCALBOARD_SERVER_ROOT:-http://localhost}
+      - FOCALBOARD_SERVER_ROOT=${FOCALBOARD_SERVER_ROOT:-https://localhost}
 
   db:
     image: postgres:15-alpine
+    # Raspberry Pi aarch64 maps to Docker platform linux/arm64.
     platform: linux/arm64
     container_name: focalboard-db
     restart: unless-stopped
@@ -44,6 +46,7 @@ services:
 
   proxy:
     image: nginx:stable-alpine
+    # Raspberry Pi aarch64 maps to Docker platform linux/arm64.
     platform: linux/arm64
     container_name: focalboard-proxy
     restart: unless-stopped
@@ -54,8 +57,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/focalboard.conf:ro
-      # Uncomment to mount TLS certificates for HTTPS:
-      # - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
     networks:
       - proxy
 
