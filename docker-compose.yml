@@ -15,6 +15,9 @@ services:
     container_name: focalboard
     restart: always
     platform: ${DOCKER_PLATFORM:-linux/amd64}
+    depends_on:
+      postgresql:
+        condition: service_healthy
     build:
       context: ./src/requirements/focalboard
     ports:
@@ -23,6 +26,8 @@ services:
       - ./src/.env
     volumes:
       - focalboard-data:/var/lib/focalboard/data
+    secrets:
+      - db_credentials
     networks:
       - my-network
 
@@ -37,8 +42,11 @@ services:
       - ./src/.env
     volumes:
       - postgresql-data:/var/lib/postgresql/data
+    secrets:
+      - db_credentials
     networks:
       - my-network
+  
 
 networks:
   my-network:
@@ -58,3 +66,6 @@ volumes:
       device: ${HOME}/data/focalboard
       o: bind
 
+secrets:
+  db_credentials:
+    file: ./secrets/postgres_credentials.txt
