@@ -1,13 +1,13 @@
-FROM alpine:3.21.5
+FROM debian:bookworm-slim
 
-RUN <<EOF
-apk update
-apk add --no-cache \
-	wget \
-	tar \
-	openrc \
-	gettext
-EOF
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+RUN echo "Building for $TARGETPLATFORM on $BUILDPLATFORM"
+
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends wget tar ca-certificates \
+	&& rm -rf /var/lib/apt/lists/*
 
 RUN <<EOF
 wget https://github.com/mattermost-community/focalboard/releases/download/v7.10.6/focalboard-server-linux-amd64.tar.gz 
@@ -15,12 +15,11 @@ tar -xvzf focalboard-server-linux-amd64.tar.gz
 mv focalboard /opt/focalboard
 EOF
 
-COPY focalboard.service /etc/systemd/system/
+COPY config.json /opt/focalboard/
+RUN chmod +x /opt/focalboard/bin/focalboard-server
 
-RUN rc-update add /opt/focalboard default
+WORKDIR /opt/focalboard
 
 EXPOSE 8000
 
-# COPY config.json /opt/focalboard/config.json
-
-CMD ["rc-service", "/opt/focalboard", "restart"]
+CMD ["./bin/focalboard-server"]
