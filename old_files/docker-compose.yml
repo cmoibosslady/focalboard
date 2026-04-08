@@ -1,0 +1,29 @@
+# Simple single-container deployment using the official Focalboard image.
+# Data is stored in an SQLite database inside the named volume "fbdata".
+#
+# Usage:
+#   docker compose up -d
+#   Open http://<raspberry-pi-ip>:8000
+
+version: "3.9"
+
+services:
+  focalboard:
+    image: mattermost/focalboard:latest
+    # Ensure Docker pulls/runs the ARM64 image on Raspberry Pi 5.
+    platform: linux/arm64
+    container_name: focalboard
+    restart: unless-stopped
+    volumes:
+      - fbdata:/opt/focalboard/data
+      - ./config/focalboard.json:/opt/focalboard/config.json:ro
+    ports:
+      # Map host port 8000 to the container's port 8000.
+      # Change the left-hand side to expose a different host port, e.g. "80:8000".
+      - "${FOCALBOARD_PORT:-8000}:8000"
+    environment:
+      # Override with your public hostname/IP when accessing from the internet.
+      - FOCALBOARD_SERVER_ROOT=${FOCALBOARD_SERVER_ROOT:-http://localhost:8000}
+
+volumes:
+  fbdata:
