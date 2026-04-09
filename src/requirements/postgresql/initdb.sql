@@ -1,0 +1,31 @@
+SELECT format(
+	'CREATE ROLE %I LOGIN PASSWORD %L',
+	'${POSTGRES_USER}',
+	'${POSTGRES_PASSWORD}'
+)
+WHERE NOT EXISTS (
+	SELECT 1
+	FROM pg_catalog.pg_roles
+	WHERE rolname = '${POSTGRES_USER}'
+)
+\gexec
+
+SELECT format(
+	'CREATE DATABASE %I OWNER %I',
+	'${POSTGRES_NAME}',
+	'${POSTGRES_USER}'
+)
+WHERE NOT EXISTS (
+	SELECT 1
+	FROM pg_database
+	WHERE datname = '${POSTGRES_NAME}'
+)
+\gexec
+
+SELECT format(
+	'GRANT ALL PRIVILEGES ON DATABASE %I TO %I',
+	'${POSTGRES_NAME}',
+	'${POSTGRES_USER}'
+)
+\gexec
+
