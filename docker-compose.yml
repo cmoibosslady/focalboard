@@ -62,14 +62,14 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ${HOME}/data/postgresql
+      device: /mnt/usb/data/postgresql
       o: bind
 
   focalboard-data:
     driver: local
     driver_opts:
       type: none
-      device: ${HOME}/data/focalboard
+      device: /mnt/usb/data/focalboard
       o: bind
 
 secrets:
