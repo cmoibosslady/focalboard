@@ -1,30 +1,28 @@
-FROM debian:bookworm-slim
+# Credits to jimmymasaru
+ARG FOCALBOARD_TAG=v7.1.0
+ARG FOCALBOARD_DOCKER_TAG=7.1.0
 
-ARG TARGETPLATFORM
-ARG BUILDPLATFORM
+FROM alpine/git AS repo
+ARG FOCALBOARD_TAG
+RUN git clone -b ${FOCALBOARD_TAG} --depth 1 https://github.com/mattermost/focalboard.git /focalboard
 
-RUN echo "Building for $TARGETPLATFORM on $BUILDPLATFORM"
+# Cannot create FrontEnd on raspverry so grabbing it from dockerhub
+FROM mattermost/focalboard:${FOCALBOARD_DOCKER_TAG} AS frontend_official
 
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends wget tar ca-certificates \
-	&& rm -rf /var/lib/apt/lists/*
+FROM golang:1.18.3 AS backend
+ARG TARGETARCH=arm
+WORKDIR /focalboard
+COPY --from=repo /focalboard .
+RUN sed -i "s/GOARCH=amd64/GOARCH=${TARGETARCH}/g" Makefile
+RUN EXCLUDE_PLUGIN=true EXCLUDE_SERVER=true EXCLUDE_ENTERPRISE=true make server-linux
 
-RUN <<EOF
-wget https://github.com/mattermost-community/focalboard/releases/download/v7.10.6/focalboard-server-linux-amd64.tar.gz 
-tar -xvzf focalboard-server-linux-amd64.tar.gz
-mv focalboard /opt/focalboard
-EOF
-
-RUN <<EOF
-source /run/secrets/db_credentials
-export POSTGRES_NAME POSTGRES_USER POSTGRES_PASSWORD
-EOF
-
-COPY config.json /opt/focalboard/
-RUN chmod +x /opt/focalboard/bin/focalboard-server
-
+FROM debian:buster-slim
 WORKDIR /opt/focalboard
+COPY --from=backend --chown=nobody:nobody /focalboard/bin/linux/focalboard-server ./bin/
+COPY --from=backend --chown=nobody:nobody /focalboard/LICENSE.txt ./LICENSE.txt
+# COPY --from=frontend /webapp/pack ./pack
+COPY --from=frontend_official --chown=nobody:nobody /opt/focalboard/pack ./pack
 
-EXPOSE 8000
+COPY ./config.json /opt/focalboard/config.json
 
-CMD ["./bin/focalboard-server"]
+CMD ["/opt/focalboard/bin/focalboard-server"]
