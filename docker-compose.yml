@@ -14,7 +14,7 @@ services:
   focalboard:
     container_name: focalboard
     restart: always
-    platform: ${DOCKER_PLATFORM:-linux/amd64}
+    platform: ${DOCKER_PLATFORM:-linux/arm64}
     depends_on:
       postgresql:
         condition: service_healthy
