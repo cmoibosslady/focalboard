@@ -5,7 +5,7 @@ services:
     build:
       context: ./src/requirements/nginx
     ports:
-      - "443"
+      - "443:443"
     env_file:
       - ./src/.env
     networks:

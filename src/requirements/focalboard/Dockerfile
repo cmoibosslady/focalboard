@@ -25,6 +25,7 @@ COPY --from=backend --chown=nobody:nobody /focalboard/LICENSE.txt ./LICENSE.txt
 # COPY --from=frontend /webapp/pack ./pack
 COPY --from=frontend_official --chown=nobody:nobody /opt/focalboard/pack ./pack
 
+EXPOSE 8000
 COPY ./config.json /opt/focalboard/config.json
 
 CMD ["/opt/focalboard/bin/focalboard-server"]

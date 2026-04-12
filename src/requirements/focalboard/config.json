@@ -1,5 +1,5 @@
 {
-	"serverRoot": "https://bosslady.eu1.netbird.services",
+	"serverRoot": "https://jb.focalboard.fr",
 	"port": 8000,
 	"dbtype": "postgres",
 	"dbconfig": "postgres://focalboard:purple+motor+money@postgresql:5432/boards?sslmode=disable&connect_timeout=10",
