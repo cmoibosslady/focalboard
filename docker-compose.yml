@@ -15,9 +15,6 @@ services:
     container_name: focalboard
     restart: always
     platform: ${DOCKER_PLATFORM:-linux/arm64}
-    depends_on:
-      postgresql:
-        condition: service_healthy
     build:
       context: ./src/requirements/focalboard
     env_file:
@@ -40,12 +37,6 @@ services:
       - postgresql-data:/var/lib/postgresql/data
     secrets:
       - db_credentials
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
-      interval: 10s
-      timeout: 5s
-      retries: 6
-      start_period: 20s
     networks:
       - my-network
   
@@ -58,14 +49,14 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /mnt/usb/data/postgresql
+      device: ~/data/postgresql
       o: bind
 
   focalboard-data:
     driver: local
     driver_opts:
       type: none
-      device: /mnt/usb/data/focalboard
+      device: ~/data/focalboard
       o: bind
 
 secrets:
