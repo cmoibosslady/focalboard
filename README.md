@@ -9,13 +9,15 @@ One focalboard server is equal to one focalboard, not multiple board in one serv
 ``` bash
 .
 ├── docker-compose.yml
+├── README.md
 ├── secrets
-│   └── postgres_credentials.txt // create this file from the example
+│   └── postgres_credentials.txt
 └── src
     └── requirements
         ├── focalboard
         │   ├── config.json
-        │   └── Dockerfile
+        │   ├── Dockerfile
+        │   └── entrypoint.sh
         ├── nginx
         │   ├── Dockerfile
         │   └── nginx.conf
