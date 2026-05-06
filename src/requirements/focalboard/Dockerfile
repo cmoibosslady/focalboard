@@ -20,12 +20,18 @@ RUN EXCLUDE_PLUGIN=true EXCLUDE_ENTERPRISE=true make server-linux
 
 FROM --platform=${TARGETPLATFORM} debian:buster-slim
 WORKDIR /opt/focalboard
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends gettext-base \
+	&& rm -rf /var/lib/apt/lists/*
 COPY --from=backend --chown=nobody:nobody /focalboard/bin/linux/focalboard-server ./bin/
 COPY --from=backend --chown=nobody:nobody /focalboard/LICENSE.txt ./LICENSE.txt
 # COPY --from=frontend /webapp/pack ./pack
 COPY --from=frontend_official --chown=nobody:nobody /opt/focalboard/pack ./pack
 
 EXPOSE 8000
-COPY ./config.json /opt/focalboard/config.json
+COPY ./config.json /opt/focalboard/config.template.json
+COPY ./entrypoint.sh /opt/focalboard/entrypoint.sh
+RUN chmod +x /opt/focalboard/entrypoint.sh
 
+ENTRYPOINT ["/opt/focalboard/entrypoint.sh"]
 CMD ["/opt/focalboard/bin/focalboard-server"]
